@@ -19,7 +19,7 @@ class ThemoviedbSpider(scrapy.Spider):
 
     def parse_item(self, response):
 
-        url = self.url
+        url = response.url
         title = response.xpath('//div[@class="title ott_false"]/h2/a/text()').get()
         publish_year = response.xpath('//div[@class="title ott_false"]/h2/span/text()').get()
         certification = (
