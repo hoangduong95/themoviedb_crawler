@@ -5,8 +5,24 @@
 
 import scrapy
 
+# from scrapy.item import Field
+
 
 class ThemoviedbItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
+    # url = Field()
+    # title = Field()
+    # publish_year = Field()
+    # certification = Field()
+    # release = Field()
+    # genres = Field()
+    # runtime = Field()
+    # user_score = Field()
+    # header_info = Field()
+    # overview = Field()
+    # top_billed_cast = Field()
+    # cast = Field()
+    # crew = Field()
+    # budget = Field()
+    # revenue = Field()
+    # keywords = Field()
     pass
