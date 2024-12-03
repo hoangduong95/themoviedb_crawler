@@ -7,7 +7,7 @@ import logging
 import re
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter, is_item
+# from itemadapter import ItemAdapter, is_item
 from scrapy import Request, Spider, signals
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from scrapy.http import Response
@@ -122,17 +122,15 @@ class CustomRetryMiddleware(RetryMiddleware):
 
         retry_url_pattern = getattr(spider, "retry_url_pattern", None)
         title_element = getattr(spider, "title_element", None)
-        certification_element = getattr(spider, "certification_element", None)
+        # certification_element = getattr(spider, 'certification_element', None)
         # logger.info(retry_url_pattern)
 
         if response.status == 200:
             # logger.info(f"CustomRetryMiddleware processing response from {request.url}")
             if re.fullmatch(retry_url_pattern, request.url):
                 logger.info(f"Checking readiness of {request.url}")
-                if (not response.xpath(title_element)) or (
-                    not response.xpath(certification_element)
-                ):
-                    reason = f"XPath '{title_element}' or '{certification_element}' not found in response"
+                if not response.xpath(title_element):
+                    reason = f"XPath '{title_element}' not found in response"
                     logger.warning(reason)
                     return self._retry(request, reason, spider) or response
         return response

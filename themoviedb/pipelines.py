@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 class ThemoviedbPipeline:
     def process_item(self, item, spider):
         publish_year = item["publish_year"].strip("()")
-        certification = item["certification"].strip()
+        origin_certification = item["certification"]
+        certification = ""
+        if origin_certification:
+            certification = origin_certification.strip()
         release = item["release"].strip()
         origin_genres = item["genres"]
         # # print(publish_year)
