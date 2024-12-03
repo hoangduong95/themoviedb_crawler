@@ -19,10 +19,10 @@ class TmdbMoviesSpider(scrapy.Spider):
     def parse(self, response):
         logger.info(response.url)
         self.pagination_count += 1
-        items = response.xpath(
+        movie_items = response.xpath(
             '//div[@class="media_items results"]//div[@class="content"]//a/@href'
         )
-        yield from response.follow_all(items, callback=self.parse_item)
+        yield from response.follow_all(movie_items, callback=self.parse_movie)
         next_page = response.xpath('//p[@class="load_more"]/a[text()="Load More"]/@href').get()
         if (
             next_page is not None
@@ -31,7 +31,7 @@ class TmdbMoviesSpider(scrapy.Spider):
             next_page = response.urljoin(next_page)
             yield scrapy.Request(next_page, callback=self.parse)
 
-    def parse_item(self, response):
+    def parse_movie(self, response):
         url = response.url
         title = response.xpath('//div[@class="title ott_false"]/h2/a/text()').get()
         publish_year = response.xpath('//div[@class="title ott_false"]/h2//span/text()').get()
@@ -58,7 +58,7 @@ class TmdbMoviesSpider(scrapy.Spider):
         budget = response.xpath('//p[strong[bdi[text()="Budget"]]]/text()').get()
         revenue = response.xpath('//p[strong[bdi[text()="Revenue"]]]/text()').get()
         keywords = response.xpath(
-            '//section[@class="keywords right_column"]//a[@class="rounded"]/text()'
+            '//section[@class="keywords right_column"]//a[@class="rounded" or @class="!border !border-tmdb-light-blue font-semibold"]/text()'
         ).getall()
         movie_item = {
             "url": url,
