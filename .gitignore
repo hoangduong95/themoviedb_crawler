@@ -48,5 +48,3 @@ build/
 
 ### Python ###
 **/__pycache__
-themoviedb/__pycache__/
-themoviedb/spiders/__pycache__/
