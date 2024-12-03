@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import scrapy
@@ -8,7 +9,13 @@ logger = logging.getLogger(__name__)
 class ThemoviedbSpider(scrapy.Spider):
     name = "TheMovieDB"
     allowed_domains = ["www.themoviedb.org"]
-    start_urls = ["https://www.themoviedb.org/movie"]
+    start_urls = ["https://www.themoviedb.org/movie?page=2"]
+
+    retry_url_pattern = r"https:\/\/www\.themoviedb\.org\/movie\/\d+(-[a-zA-Z0-9\-]+)*"
+    title_element = '//div[@class="title ott_false"]/h2/a/text()'
+    certification_element = (
+        '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="certification"]/text()'
+    )
 
     def parse(self, response):
         # logger.info(response.request.headers['User-Agent'])
@@ -17,20 +24,12 @@ class ThemoviedbSpider(scrapy.Spider):
         )
         yield from response.follow_all(items, callback=self.parse_item)
 
-    def parse_item(self, response):
+    async def parse_item(self, response):
 
-        # movie_item = ThemoviedbItem()
-        # movie_item["url"] = response.url
         url = response.url
-        # movie_item["title"] = response.xpath('//div[@class="title ott_false"]/h2//text()').get()
-        title = response.xpath('//div[@class="title ott_false"]/h2/a/text()').get()
-        # movie_item["publish_year"] = response.xpath(
-        #     '//div[@class="title ott_false"]/h2//span/text()'
-        # ).get()
+        title = response.xpath(self.title_element).get()
         publish_year = response.xpath('//div[@class="title ott_false"]/h2//span/text()').get()
-        certification = response.xpath(
-            '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="certification"]/text()'
-        ).get()
+        certification = response.xpath(self.certification_element).get()
         release = response.xpath(
             '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="release"]/text()'
         ).get()
@@ -69,14 +68,17 @@ class ThemoviedbSpider(scrapy.Spider):
             "revenue": revenue,
             "keywords": keywords,
         }
+        # cast_link = response.xpath(
+        #     '//div[@id="cast_scroller"]/ol[@class="people scroller"]/li[@class="filler view_more"]/p/a/@href'
+        # ).get()
         cast_link = response.xpath(
-            '//div[@id="cast_scroller"]/ol[@class="people scroller"]/li[@class="filler view_more"]/p/a/@href'
+            '//p[@class="new_button"]/a[text()="Full Cast & Crew"]/@href'
         ).get()
-        # request = scrapy.Request(cast_link, callback=self.parse_cast, meta = {'item': movie_item})
-        # request.meta['item'] = movie_item
+        # logger.info(cast_link)
         yield response.follow(cast_link, callback=self.parse_cast, meta={"item": movie_item})
 
-    def parse_cast(self, response):
+    async def parse_cast(self, response):
+        # await asyncio.sleep(2)
         movie_item = response.meta["item"]
         movie_item["cast"] = response.xpath(
             '//section[@class="panel pad" and h3[contains(text(),"Cast")]]//div[@class="info"]//a/text() | //section[@class="panel pad" and h3[contains(text(),"Cast")]]//div[@class="info"]//p[@class="character"]/text()'
@@ -85,3 +87,5 @@ class ThemoviedbSpider(scrapy.Spider):
             '//div[@class="crew_wrapper"]//div[@class="info"]//span//a/text() | //div[@class="crew_wrapper"]//div[@class="info"]//span/p[@class="episode_count_crew"]/text()'
         ).getall()
         yield movie_item
+
+        # Mot so elements ko kip load khi scrapy lam viec -> scrape gia tri None
