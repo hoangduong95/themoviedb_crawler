@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 import scrapy
@@ -6,30 +5,39 @@ import scrapy
 logger = logging.getLogger(__name__)
 
 
-class ThemoviedbSpider(scrapy.Spider):
-    name = "TheMovieDB"
+class TmdbMoviesSpider(scrapy.Spider):
+    name = "TMDB_Movies"
     allowed_domains = ["www.themoviedb.org"]
-    start_urls = ["https://www.themoviedb.org/movie?page=2"]
-
-    retry_url_pattern = r"https:\/\/www\.themoviedb\.org\/movie\/\d+(-[a-zA-Z0-9\-]+)*"
-    title_element = '//div[@class="title ott_false"]/h2/a/text()'
-    certification_element = (
-        '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="certification"]/text()'
-    )
+    start_urls = ["https://www.themoviedb.org/movie"]
+    custom_settings = {
+        "ITEM_PIPELINES": {
+            "themoviedb.pipelines.TmdbMoviePipeline": 300,
+        }
+    }
+    pagination_count = 0
 
     def parse(self, response):
-        # logger.info(response.request.headers['User-Agent'])
+        logger.info(response.url)
+        self.pagination_count += 1
         items = response.xpath(
             '//div[@class="media_items results"]//div[@class="content"]//a/@href'
         )
         yield from response.follow_all(items, callback=self.parse_item)
+        next_page = response.xpath('//p[@class="load_more"]/a[text()="Load More"]/@href').get()
+        if (
+            next_page is not None
+            and self.pagination_count <= 0  # bỏ điều kiện về pagination_count nếu chạy thật
+        ):
+            next_page = response.urljoin(next_page)
+            yield scrapy.Request(next_page, callback=self.parse)
 
-    async def parse_item(self, response):
-
+    def parse_item(self, response):
         url = response.url
-        title = response.xpath(self.title_element).get()
+        title = response.xpath('//div[@class="title ott_false"]/h2/a/text()').get()
         publish_year = response.xpath('//div[@class="title ott_false"]/h2//span/text()').get()
-        certification = response.xpath(self.certification_element).get()
+        certification = response.xpath(
+            '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="certification"]/text()'
+        ).get()
         release = response.xpath(
             '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="release"]/text()'
         ).get()
@@ -68,17 +76,17 @@ class ThemoviedbSpider(scrapy.Spider):
             "revenue": revenue,
             "keywords": keywords,
         }
-        # cast_link = response.xpath(
-        #     '//div[@id="cast_scroller"]/ol[@class="people scroller"]/li[@class="filler view_more"]/p/a/@href'
-        # ).get()
         cast_link = response.xpath(
             '//p[@class="new_button"]/a[text()="Full Cast & Crew"]/@href'
         ).get()
-        # logger.info(cast_link)
-        yield response.follow(cast_link, callback=self.parse_cast, meta={"item": movie_item})
+        if cast_link:
+            yield response.follow(cast_link, callback=self.parse_cast, meta={"item": movie_item})
+        else:
+            movie_item["cast"] = None
+            movie_item["crew"] = None
+            yield movie_item
 
-    async def parse_cast(self, response):
-        # await asyncio.sleep(2)
+    def parse_cast(self, response):
         movie_item = response.meta["item"]
         movie_item["cast"] = response.xpath(
             '//section[@class="panel pad" and h3[contains(text(),"Cast")]]//div[@class="info"]//a/text() | //section[@class="panel pad" and h3[contains(text(),"Cast")]]//div[@class="info"]//p[@class="character"]/text()'
@@ -87,5 +95,3 @@ class ThemoviedbSpider(scrapy.Spider):
             '//div[@class="crew_wrapper"]//div[@class="info"]//span//a/text() | //div[@class="crew_wrapper"]//div[@class="info"]//span/p[@class="episode_count_crew"]/text()'
         ).getall()
         yield movie_item
-
-        # Mot so elements ko kip load khi scrapy lam viec -> scrape gia tri None

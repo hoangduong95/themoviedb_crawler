@@ -73,9 +73,9 @@ USER_AGENT = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    "themoviedb.pipelines.ThemoviedbPipeline": 300,
-}
+# ITEM_PIPELINES = {
+#     "themoviedb.pipelines.TMDBMoviePipeline": 300,
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -102,3 +102,5 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 LOG_LEVEL = "INFO"
+
+FEED_EXPORT_BATCH_ITEM_COUNT = 10
