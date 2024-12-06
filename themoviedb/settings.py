@@ -25,9 +25,9 @@ CONCURRENT_REQUESTS = 1
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
-# CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
@@ -51,13 +51,16 @@ DOWNLOAD_DELAY = 3
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#     "themoviedb.middlewares.ThemoviedbDownloaderMiddleware": 543,
+#     # "themoviedb.middlewares.ThemoviedbDownloaderMiddleware": 543,
 #     # "themoviedb.middlewares.CustomRetryMiddleware": 550,
-#     "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
-#     "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
-#     "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 400,
-#     "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 401,
+#     # "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
+#     # "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
+#     # "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 400,
+#     # "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 401,
+#     'rotating_proxies.middlewares.RotatingProxyMiddleware': 300,
+#     'rotating_proxies.middlewares.BanDetectionMiddleware': 301,
 # }
+# ROTATING_PROXY_LIST_PATH = 'proxies.txt'
 # FAKEUSERAGENT_PROVIDERS = [
 #     "scrapy_fake_useragent.providers.FakeUserAgentProvider",  # this is the first provider we'll try
 #     "scrapy_fake_useragent.providers.FakerProvider",  # if FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
@@ -81,12 +84,12 @@ USER_AGENT = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-AUTOTHROTTLE_START_DELAY = 5
+# AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
 AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
+# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
 
@@ -103,4 +106,4 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 LOG_LEVEL = "INFO"
 
-FEED_EXPORT_BATCH_ITEM_COUNT = 10
+FEED_EXPORT_BATCH_ITEM_COUNT = 1000

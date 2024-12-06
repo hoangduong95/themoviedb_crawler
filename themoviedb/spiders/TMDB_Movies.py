@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class TmdbMoviesSpider(scrapy.Spider):
     name = "TMDB_Movies"
     allowed_domains = ["www.themoviedb.org"]
-    start_urls = ["https://www.themoviedb.org/movie"]
+    start_urls = ["https://www.themoviedb.org/movie?page=122"]
     custom_settings = {
         "ITEM_PIPELINES": {
             "themoviedb.pipelines.TmdbMoviePipeline": 300,
@@ -25,8 +25,9 @@ class TmdbMoviesSpider(scrapy.Spider):
         yield from response.follow_all(movie_items, callback=self.parse_movie)
         next_page = response.xpath('//p[@class="load_more"]/a[text()="Load More"]/@href').get()
         if (
-            next_page is not None
-            and self.pagination_count <= 0  # bỏ điều kiện về pagination_count nếu chạy thật
+            next_page
+            is not None
+            # and self.pagination_count <= 1  # bỏ điều kiện về pagination_count nếu chạy thật
         ):
             next_page = response.urljoin(next_page)
             yield scrapy.Request(next_page, callback=self.parse)
