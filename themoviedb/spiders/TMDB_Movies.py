@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class TmdbMoviesSpider(scrapy.Spider):
     name = "TMDB_Movies"
     allowed_domains = ["www.themoviedb.org"]
-    start_urls = ["https://www.themoviedb.org/movie?page=122"]
+    start_urls = ["https://www.themoviedb.org/movie"]
     custom_settings = {
         "ITEM_PIPELINES": {
             "themoviedb.pipelines.TmdbMoviePipeline": 300,
@@ -25,9 +25,8 @@ class TmdbMoviesSpider(scrapy.Spider):
         yield from response.follow_all(movie_items, callback=self.parse_movie)
         next_page = response.xpath('//p[@class="load_more"]/a[text()="Load More"]/@href').get()
         if (
-            next_page
-            is not None
-            # and self.pagination_count <= 1  # bỏ điều kiện về pagination_count nếu chạy thật
+            next_page is not None
+            and self.pagination_count <= 0  # bỏ điều kiện về pagination_count nếu chạy thật
         ):
             next_page = response.urljoin(next_page)
             yield scrapy.Request(next_page, callback=self.parse)
@@ -81,18 +80,37 @@ class TmdbMoviesSpider(scrapy.Spider):
             '//p[@class="new_button"]/a[text()="Full Cast & Crew"]/@href'
         ).get()
         if cast_link:
-            yield response.follow(cast_link, callback=self.parse_cast, meta={"item": movie_item})
+            yield response.follow(
+                cast_link, callback=self.parse_cast, cb_kwargs={"movie_item": movie_item}
+            )
         else:
             movie_item["cast"] = None
             movie_item["crew"] = None
             yield movie_item
 
-    def parse_cast(self, response):
-        movie_item = response.meta["item"]
-        movie_item["cast"] = response.xpath(
-            '//section[@class="panel pad" and h3[contains(text(),"Cast")]]//div[@class="info"]//a/text() | //section[@class="panel pad" and h3[contains(text(),"Cast")]]//div[@class="info"]//p[@class="character"]/text()'
-        ).getall()
-        movie_item["crew"] = response.xpath(
-            '//div[@class="crew_wrapper"]//div[@class="info"]//span//a/text() | //div[@class="crew_wrapper"]//div[@class="info"]//span/p[@class="episode_count_crew"]/text()'
-        ).getall()
+    def parse_cast(self, response, movie_item):
+        cast_elements = response.xpath(
+            '//section[@class="panel pad" and h3[contains(text(),"Cast")]]//div[@class="info"]'
+        )
+        cast = {}
+        for cast_element in cast_elements:
+            actor = cast_element.xpath("p[1]/a/text()").get()
+            character = cast_element.xpath('p[@class="character"]/a/text()').getall()
+            cast[actor] = ",".join(character)
+        movie_item["cast"] = cast
+
+        crew_elements = response.xpath('//div[@class="crew_wrapper"]//div[@class="info"]//span')
+        crew = {}
+        for crew_element in crew_elements:
+            crew_member = crew_element.xpath("p[1]/a/text()").get()
+            role_raw = crew_element.xpath('p[@class="episode_count_crew"]/text()').get()
+
+            role = []
+            if role_raw:
+                role = [element.strip() for element in role_raw.split(",")]
+            if crew_member in crew:
+                crew[crew_member].extend(role)
+            else:
+                crew[crew_member] = role
+        movie_item["crew"] = crew
         yield movie_item

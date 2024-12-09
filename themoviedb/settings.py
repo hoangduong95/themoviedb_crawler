@@ -28,7 +28,6 @@ CONCURRENT_REQUESTS = 1
 DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
-# CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -106,4 +105,4 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 LOG_LEVEL = "INFO"
 
-FEED_EXPORT_BATCH_ITEM_COUNT = 1000
+# FEED_EXPORT_BATCH_ITEM_COUNT = 1000
