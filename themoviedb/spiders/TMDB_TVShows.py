@@ -105,7 +105,7 @@ class TmdbTvshowsSpider(scrapy.Spider):
             cast[actor] = ",".join(character)
         tvshow_item["cast"] = cast
 
-        crew_elements = response.xpath('//div[@class="crew_wrapper"]//div[@class="info"]//span')
+        crew_elements = response.xpath('//div[@class="crew_wrapper"]//div[@class="info"]/span')
         crew = {}
         for crew_element in crew_elements:
             crew_member = crew_element.xpath("p[1]/a/text()").get()
