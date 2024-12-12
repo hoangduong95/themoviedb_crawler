@@ -95,8 +95,8 @@ class TmdbMoviesSpider(scrapy.Spider):
         cast = {}
         for cast_element in cast_elements:
             actor = cast_element.xpath("p[1]/a/text()").get()
-            character = cast_element.xpath('p[@class="character"]/a/text()').getall()
-            cast[actor] = ",".join(character)
+            character = cast_element.xpath('p[@class="character"]/text()').get()
+            cast[actor] = character.strip()
         movie_item["cast"] = cast
 
         crew_elements = response.xpath('//div[@class="crew_wrapper"]//div[@class="info"]/span')
