@@ -20,14 +20,14 @@ NEWSPIDER_MODULE = "themoviedb.spiders"
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 1
+CONCURRENT_REQUESTS = 10
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 1
+CONCURRENT_REQUESTS_PER_DOMAIN = 10
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -49,17 +49,17 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 1
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#     # "themoviedb.middlewares.ThemoviedbDownloaderMiddleware": 543,
-#     # "themoviedb.middlewares.CustomRetryMiddleware": 550,
-#     # "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
-#     # "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
-#     # "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 400,
-#     # "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 401,
-#     'rotating_proxies.middlewares.RotatingProxyMiddleware': 300,
-#     'rotating_proxies.middlewares.BanDetectionMiddleware': 301,
-# }
-# ROTATING_PROXY_LIST_PATH = 'proxies.txt'
+DOWNLOADER_MIDDLEWARES = {
+    # "themoviedb.middlewares.ThemoviedbDownloaderMiddleware": 543,
+    # "themoviedb.middlewares.CustomRetryMiddleware": 550,
+    # "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
+    # "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
+    # "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 400,
+    # "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 401,
+    "rotating_proxies.middlewares.RotatingProxyMiddleware": 300,
+    "rotating_proxies.middlewares.BanDetectionMiddleware": 301,
+}
+ROTATING_PROXY_LIST_PATH = "proxies.txt"
 # FAKEUSERAGENT_PROVIDERS = [
 #     "scrapy_fake_useragent.providers.FakeUserAgentProvider",  # this is the first provider we'll try
 #     "scrapy_fake_useragent.providers.FakerProvider",  # if FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
@@ -105,4 +105,4 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 LOG_LEVEL = "INFO"
 
-# FEED_EXPORT_BATCH_ITEM_COUNT = 1000
+FEED_EXPORT_BATCH_ITEM_COUNT = 100

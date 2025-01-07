@@ -25,27 +25,28 @@ class TmdbMoviesSpider(scrapy.Spider):
         yield from response.follow_all(movie_items, callback=self.parse_movie)
         next_page = response.xpath('//p[@class="load_more"]/a[text()="Load More"]/@href').get()
         if (
-            next_page is not None
-            and self.pagination_count <= 0  # bỏ điều kiện về pagination_count nếu chạy thật
+            next_page
+            is not None
+            # and self.pagination_count <= 5  # bỏ điều kiện về pagination_count nếu chạy thật
         ):
             next_page = response.urljoin(next_page)
             yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_movie(self, response):
         url = response.url
-        title = response.xpath('//div[@class="title ott_false"]/h2/a/text()').get()
-        publish_year = response.xpath('//div[@class="title ott_false"]/h2//span/text()').get()
+        title = response.xpath('//div[contains(@class,"title")]/h2/a/text()').get()
+        publish_year = response.xpath('//div[contains(@class,"title")]/h2//span/text()').get()
         certification = response.xpath(
-            '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="certification"]/text()'
+            '//div[contains(@class,"title")]/div[@class="facts"]/span[@class="certification"]/text()'
         ).get()
         release = response.xpath(
-            '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="release"]/text()'
+            '//div[contains(@class,"title")]/div[@class="facts"]/span[@class="release"]/text()'
         ).get()
         genres = response.xpath(
-            '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="genres"]//text()'
+            '//div[contains(@class,"title")]/div[@class="facts"]/span[@class="genres"]//text()'
         ).getall()
         runtime = response.xpath(
-            '//div[@class="title ott_false"]/div[@class="facts"]/span[@class="runtime"]/text()'
+            '//div[contains(@class,"title")]/div[@class="facts"]/span[@class="runtime"]/text()'
         ).get()
         user_score = response.xpath('//div[@class="user_score_chart"]/@data-percent').get()
         header_info = response.xpath('//div[@class="header_info"]/h3/text()').get()
